@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using TodoListApi.Data;
 using TodoListApi.Models;
 
@@ -9,10 +10,12 @@ namespace TodoListApi.Controllers
     [ApiController]
     public class TodosController : ControllerBase
     {
-        private readonly TodoContext _context;
-        public TodosController(TodoContext context)
+        private readonly AppDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        public TodosController(AppDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -37,6 +40,14 @@ namespace TodoListApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Todo>> CreateTodo(Todo todo)
         {
+            // Set UserId to the currently logged-in user's Id
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Unauthorized(); // Handle unauthorized access
+            }
+
+            todo.UserId = userId;
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
 
@@ -49,6 +60,12 @@ namespace TodoListApi.Controllers
             if (id != todo.Id)
             {
                 return BadRequest();
+            }
+
+            var userId = _userManager.GetUserId(User);
+            if (userId == null || userId != todo.UserId)
+            {
+                return Unauthorized(); // Handle unauthorized access
             }
 
             _context.Entry(todo).State = EntityState.Modified;
@@ -79,6 +96,12 @@ namespace TodoListApi.Controllers
             if (todo == null)
             {
                 return NotFound();
+            }
+
+            var userId = _userManager.GetUserId(User);
+            if (userId == null || userId != todo.UserId)
+            {
+                return Unauthorized(); // Handle unauthorized access
             }
 
             _context.Todos.Remove(todo);
