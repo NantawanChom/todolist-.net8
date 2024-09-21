@@ -21,7 +21,7 @@ builder.Services.AddControllers();
 
 
 // Register the DbContext and configure it to use PostgreSQL
-builder.Services.AddDbContext<TodoContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();

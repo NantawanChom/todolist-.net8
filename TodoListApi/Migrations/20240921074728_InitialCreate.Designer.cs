@@ -10,7 +10,7 @@ using TodoListApi.Data;
 
 namespace TodoListApi.Migrations
 {
-    [DbContext(typeof(TodoContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20240921074728_InitialCreate")]
     partial class InitialCreate
     {
