@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
 using TodoListApi.Data;
 using TodoListApi.Models;
+using System.Text;
 
 namespace TodoListApi.Controllers
 {
@@ -11,10 +15,12 @@ namespace TodoListApi.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppDbContext _context;
-        public AuthController(UserManager<IdentityUser> userManager, AppDbContext context)
+        private readonly IConfiguration _configuration;
+        public AuthController(UserManager<IdentityUser> userManager, AppDbContext context, IConfiguration configuration)
         {
             _userManager = userManager;
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -43,6 +49,47 @@ namespace TodoListApi.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User registered successfully" });
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO model)
+        {
+            var user = await _userManager.FindByNameAsync(model.Username);
+            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                var userClaims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, model.Username),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
+                var accessToken = GenerateJwtToken(userClaims, TimeSpan.FromDays(3));
+                var refreshToken = GenerateJwtToken(userClaims, TimeSpan.FromDays(7));
+
+                return Ok(new
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    AccessTokenExpiresIn = TimeSpan.FromDays(3).TotalSeconds,
+                    RefreshTokenExpiresIn = TimeSpan.FromDays(7).TotalSeconds
+                });
+            }
+
+            return Unauthorized();
+        }
+
+        private string GenerateJwtToken(IEnumerable<Claim> claims, TimeSpan expiration)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.Add(expiration),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
