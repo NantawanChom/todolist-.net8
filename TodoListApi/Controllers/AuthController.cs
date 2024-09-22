@@ -59,6 +59,7 @@ namespace TodoListApi.Controllers
             {
                 var userClaims = new[]
                 {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id), // UserId
                     new Claim(JwtRegisteredClaimNames.Sub, model.Username),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
