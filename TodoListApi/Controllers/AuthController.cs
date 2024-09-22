@@ -36,7 +36,6 @@ namespace TodoListApi.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            // Create the profile associated with the IdentityUser
             var profile = new Profile
             {
                 FirstName = model.FirstName,

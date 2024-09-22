@@ -22,28 +22,37 @@ namespace TodoListApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Todo>>> GetTodos()
+        public async Task<ActionResult<IEnumerable<Todo>>> GetTodos(string? lastId = null, int pageSize = 10)
         {
-            // Get the UserId of the logged-in user
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
                 return Unauthorized("User not authenticated.");
             }
 
-            // Query the Todos for the logged-in user
+            // Convert lastId to an integer for comparison
+            int parsedLastId = lastId != null ? int.Parse(lastId) : 0;
+
             var todos = await _context.Todos
-                .Where(t => t.UserId == userId)
+                .Where(t => t.UserId == userId && (lastId == null || t.Id > parsedLastId))
+                .Take(pageSize)
+                .OrderBy(t => t.Id) 
                 .ToListAsync();
 
-            // Optionally, you can map to a DTO if you want to exclude sensitive information
             var todoDtos = todos.Select(t => new TodoDTO
             {
                 Title = t.Title,
                 IsCompleted = t.IsComplete
             }).ToList();
 
-            return Ok(todoDtos);
+            var response = new
+            {
+                PageSize = pageSize,
+                Todos = todoDtos,
+                NextLastId = todos.Count > 0 ? todos.Last().Id.ToString() : null
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
@@ -77,14 +86,12 @@ namespace TodoListApi.Controllers
         public async Task<IActionResult> CreateTodo([FromBody] TodoDTO todoDto)
         {
 
-            // Set UserId to the currently logged-in user's Id
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
                 return Unauthorized("User not authenticated.");
             }
 
-            // Fetch the User object using the UserId
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
@@ -92,7 +99,6 @@ namespace TodoListApi.Controllers
                 return Unauthorized("User not authenticated.");
             }
 
-            // Map the DTO to the actual Todo entity
             var todo = new Todo
             {
                 Title = todoDto.Title,
@@ -103,7 +109,6 @@ namespace TodoListApi.Controllers
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
 
-            // Create the response DTO
             var responseDto = new TodoDTO
             {
                 Title = todo.Title,
@@ -162,7 +167,7 @@ namespace TodoListApi.Controllers
             var userId = _userManager.GetUserId(User);
             if (userId == null || userId != todo.UserId)
             {
-                return Unauthorized(); // Handle unauthorized access
+                return Unauthorized();
             }
 
             _context.Todos.Remove(todo);
