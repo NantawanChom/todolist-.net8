@@ -6,7 +6,7 @@
 ```bash
 dotnet new webapi -n TodoListApi
 ```
-2. Install the necessary packages
+2. Install the necessary packages (Example)
 ```bash
 dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
 dotnet add package Microsoft.EntityFrameworkCore.Design
@@ -67,3 +67,30 @@ dotnet clean MySolution.sln
 ```
 Console.WriteLine($"UserId: {userId}");
 ```
+
+**Include Urls**
+
+GET 
+1. http://localhost:5244/api/todos
+2. http://localhost:5244/api/todos?pageSize=2
+3. http://localhost:5244/api/todos?pageSize=2&lastId=10
+4. http://localhost:5244/api/todos/1
+
+POST
+1. http://localhost:5244/api/todos
+2. http://localhost:5244/api/auth/register
+3. http://localhost:5244/api/auth/login
+
+PUT
+1. http://localhost:5244/api/todos/1
+
+DELETE
+1. http://localhost:5244/api/todos/1
+
+
+
+# Checklist
+
+- [ ] Logging
+- [ ] Testing
+- [ ] Refactor code
