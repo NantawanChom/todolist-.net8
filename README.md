@@ -1,5 +1,7 @@
 # todolist-.net8
 
+[Document](https://learn.microsoft.com/en-us/ef/core/)
+
 1. create project
 ```bash
 dotnet new webapi -n TodoListApi
@@ -59,4 +61,9 @@ dotnet clean --framework net6.0
 
 ```bash
 dotnet clean MySolution.sln
+```
+
+11. Console for debug
+```
+Console.WriteLine($"UserId: {userId}");
 ```
