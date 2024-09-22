@@ -1,5 +1,6 @@
 using dotenv.net;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using TodoListApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,10 @@ var username = Environment.GetEnvironmentVariable("POSTGRES_USER");
 var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
 
 var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password}";
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 // Add services to the container.
 builder.Services.AddControllers();
