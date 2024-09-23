@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TodoListApi.Models
 {
+    [Index(nameof(Title))]
     public class Todo
     {
         public int Id { get; set; }

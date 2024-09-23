@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using TodoListApi.Data;
 using TodoListApi.Models;
-using System.Security.Claims;
+using Microsoft.Extensions.Logging;
+// using System.Diagnostics;
 
 namespace TodoListApi.Controllers
 {
@@ -15,8 +16,12 @@ namespace TodoListApi.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
-        public TodosController(AppDbContext context, UserManager<IdentityUser> userManager)
+        private readonly ILogger _logger;
+
+        [ActivatorUtilitiesConstructor] // fix error Multiple constructors accepting all given...
+        public TodosController(ILogger<TodosController> logger, AppDbContext context, UserManager<IdentityUser> userManager)
         {
+             _logger = logger;
             _context = context;
             _userManager = userManager;
         }
@@ -24,6 +29,9 @@ namespace TodoListApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Todo>>> GetTodos(string? lastId = null, int pageSize = 10)
         {
+            _logger.LogInformation("Call api get todos {DT}", 
+            DateTime.UtcNow.ToLongTimeString());
+
             var userId = _userManager.GetUserId(User);
             if (userId == null)
             {
@@ -33,11 +41,24 @@ namespace TodoListApi.Controllers
             // Convert lastId to an integer for comparison
             int parsedLastId = lastId != null ? int.Parse(lastId) : 0;
 
+            // var stopwatch = new Stopwatch();
+            // stopwatch.Start();
+
+            // var todos = await _context.Todos
+            //     .Where(t => t.UserId == userId && (lastId == null || t.Id > parsedLastId))
+            //     .Take(pageSize)
+            //     .OrderBy(t => t.Id) 
+            //     .ToListAsync();
+            
+            // Use indexed for pagination
             var todos = await _context.Todos
-                .Where(t => t.UserId == userId && (lastId == null || t.Id > parsedLastId))
-                .Take(pageSize)
-                .OrderBy(t => t.Id) 
+                .Where(t => t.UserId == userId && t.Id > parsedLastId)
+                .OrderBy(t => t.Title)                           
+                .Take(pageSize)                                  
                 .ToListAsync();
+            
+            // stopwatch.Stop();
+            // Console.WriteLine($"Query used time: {stopwatch.ElapsedMilliseconds} ms");
 
             var todoDtos = todos.Select(t => new TodoDTO
             {

@@ -5,9 +5,21 @@ using Microsoft.AspNetCore.Identity;
 using TodoListApi.Data;
 using System.Text;
 using dotenv.net;
+using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 // Load .env file
 DotEnv.Load();
