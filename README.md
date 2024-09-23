@@ -91,6 +91,6 @@ DELETE
 
 # Checklist
 
-- [ ] Logging
+- [x] Logging
 - [ ] Testing
 - [ ] Refactor code
