@@ -2,6 +2,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 using TodoListApi.Data;
 using System.Text;
 using dotenv.net;
@@ -60,8 +61,28 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Add Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Todo API",
+        Version = "v1",
+        Description = "API for managing TODO items",
+        Contact = new OpenApiContact
+        {
+            Name = "Nantawan Chomboonmee"
+        }
+    });
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Add Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 
 // Register the DbContext and configure it to use PostgreSQL
@@ -74,6 +95,16 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+}
+
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Todo API V1");
+        c.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();
