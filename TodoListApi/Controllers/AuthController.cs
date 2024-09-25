@@ -50,6 +50,19 @@ namespace TodoListApi.Controllers
             return Ok(new { message = "User registered successfully" });
         }
 
+        /// <summary>
+        /// Login user
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /login
+        ///     {
+        ///        "username": "testUser",
+        ///        "password": "password"
+        ///     }
+        ///
+        /// </remarks>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
