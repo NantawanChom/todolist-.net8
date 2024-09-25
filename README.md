@@ -1,7 +1,10 @@
 # todolist-.net8
 
 [Document](https://learn.microsoft.com/en-us/ef/core/)
+
 [Api Document](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/openapi/aspnetcore-openapi?view=aspnetcore-8.0&tabs=visual-studio%2Cminimal-apis)
+
+[Api Document](https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-8.0&tabs=visual-studio)
 
 1. create project
 ```bash

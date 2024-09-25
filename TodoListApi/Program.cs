@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using TodoListApi.Data;
+using System.Reflection;
 using System.Text;
 using dotenv.net;
 using Serilog;
@@ -75,6 +76,10 @@ builder.Services.AddSwaggerGen(c =>
             Name = "Nantawan Chomboonmee"
         }
     });
+    // Set the comments path for the Swagger JSON and UI
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"; // Your XML doc file name
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 });
 
 // Add services to the container.
@@ -103,7 +108,6 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Todo API V1");
-        c.RoutePrefix = string.Empty;
     });
 }
 
